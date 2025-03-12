@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .save-btn {
+            background: #007BFF;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #0056b3;
+        }
+        .cancel-btn {
+            background: #ccc;
+            color: black;
+        }
+        .cancel-btn:hover {
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Edit Profile</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="btn-container">
+                <button type="submit" class="save-btn">Save Changes</button>
+                <a href="{% url 'trainer_dashboard' %}" style="text-decoration: none;">
+                    <button type="button" class="cancel-btn">Cancel</button>
+                </a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

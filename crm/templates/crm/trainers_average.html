@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainers Average Points</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        /* Custom Styles */
+        .table-hover tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        .table thead th {
+            cursor: pointer;
+        }
+        .table thead th:hover {
+            background-color: #e9ecef;
+        }
+        .sort-icon {
+            margin-left: 5px;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Trainers' Average Points</h2>
+
+        <!-- Filter by Trainer Name -->
+        <div class="mb-3">
+            <label for="trainerFilter" class="form-label">Filter by Trainer Name:</label>
+            <input type="text" id="trainerFilter" class="form-control" placeholder="Enter trainer name...">
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th onclick="sortTable(0)">Trainer Name <span class="sort-icon">▼</span></th>
+                        <th onclick="sortTable(1)">Average Points <span class="sort-icon">▼</span></th>
+                    </tr>
+                </thead>
+                <tbody id="trainerTableBody">
+                    {% if avg_points_list %}
+                        {% for trainer in avg_points_list %}
+                        <tr>
+                            <td>{{ trainer.Trainer_Name|default:"-" }}</td>
+                            <td>{{ trainer.Average_Points|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No data available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Scripts -->
+    <script>
+        // Function to sort the table
+        function sortTable(columnIndex) {
+            const table = document.querySelector(".table");
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            // Determine the sorting direction
+            const isAscending = table.getAttribute("data-sort-direction") === "asc";
+            table.setAttribute("data-sort-direction", isAscending ? "desc" : "asc");
+
+            // Sort rows based on the column content
+            rows.sort((a, b) => {
+                const aValue = a.querySelectorAll("td")[columnIndex].textContent.trim();
+                const bValue = b.querySelectorAll("td")[columnIndex].textContent.trim();
+
+                if (!isNaN(aValue) && !isNaN(bValue)) {
+                    return isAscending ? aValue - bValue : bValue - aValue;
+                } else {
+                    return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                }
+            });
+
+            // Clear and re-append sorted rows
+            tbody.innerHTML = "";
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Function to filter the table by trainer name
+        document.getElementById("trainerFilter").addEventListener("input", function () {
+            const filterValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#trainerTableBody tr");
+
+            rows.forEach(row => {
+                const trainerName = row.querySelector("td").textContent.toLowerCase();
+                if (trainerName.includes(filterValue)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

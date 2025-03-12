@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students Feedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Students Feedback</h2>
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Trainer Name</th>
+                        <th>Interaction</th>
+                        <th>Learning</th>
+                        <th>Rating</th>
+                        <th>Points</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if feedback_list %}
+                        {% for feedback in feedback_list %}
+                        <tr>
+                            <td>{{ feedback.Timestamp|default:"-" }}</td>
+                            <td>{{ feedback.Trainer_Name|default:"-" }}</td>
+                            <td>{{ feedback.Interaction_How_was_the_interaction_throughout_the_session|default:"-" }}</td>
+                            <td>{{ feedback.Learning_Quotient_How_much_of_the_knowledge_shared_in_the_session_did_you_understand|default:"-" }}</td>
+                            <td>{{ feedback.Trainers_Rating_Rate_the_trainer_based_on_their_knowledge_interaction_energy_of_the_session_and_patience|default:"-" }}</td>
+                            <td>{{ feedback.Trainers_Point|default:"-" }}</td>
+                            <td>{{ feedback.Any_other_feedbacks_suggestions|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No feedback available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

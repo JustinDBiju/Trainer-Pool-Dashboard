@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scrolling */
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 220px;
+            background: #333;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed; /* Make the sidebar fixed */
+            height: 100vh; /* Full height */
+            overflow-y: auto; /* Enable scrolling if content overflows */
+        }
+
+        .sidebar button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .sidebar button:hover {
+            background: #444;
+        }
+
+        /* Content Styles */
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            margin-left: 250px; /* Offset for the fixed sidebar */
+            overflow-y: auto; /* Enable scrolling for content */
+            height: 100vh; /* Full height */
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            cursor: pointer;
+            background: #ddd;
+        }
+
+        th:hover {
+            background: #ccc;
+        }
+
+        /* Logout Container Styles */
+        .logout-container {
+            padding: 10px;
+            text-align: center;
+            background: #222;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 210px; /* Match sidebar width */
+        }
+
+        .logout-container a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 20px;
+            background: red;
+            border-radius: 5px;
+        }
+
+        .logout-container a:hover {
+            background: darkred;
+        }
+    </style>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <button onclick="window.location.href='?section=trainer_list'">Trainer List</button>
+        <button onclick="window.location.href='?section=performance_summary'">Trainer Performance</button>
+        <button onclick="window.location.href='?section=leaderboard'">Leaderboard</button>
+        <button onclick="window.location.href='?section=students_feedback'">Students Feedback</button>
+        <button onclick="window.location.href='?section=trainers_average'">Trainers Average</button>
+        <div class="logout-container">
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        {% if section == "trainer_list" %}
+            <h2>Trainer List</h2>
+            {% if trainers %}
+                <table>
+                    <tr>
+                        <th>Trainer Name</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for trainer in trainers %}
+                    <tr>
+                        <td>{{ trainer.user.username }}</td>
+                        <td>
+                            <a href="{% url 'trainer_detail' trainer.id %}">
+                                <button>View</button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No trainers available.</p>
+            {% endif %}
+
+        {% elif section == "performance_summary" %}
+            <h2>Trainer Performance Summary</h2>
+            {% if trainer_data_list %}
+                <table>
+                    <tr>
+                        <th>Trainer</th>
+                        <th>Classes Taken</th>
+                        <th>Workshops</th>
+                        <th>Students Participated</th>
+                        <th>Students Won</th>
+                    </tr>
+                    {% for trainer in trainer_data_list %}
+                    <tr>
+                        <td>{{ trainer.trainer.user.username }}</td>
+                        <td>{{ trainer.classes_taken }}</td>
+                        <td>{{ trainer.workshops }}</td>
+                        <td>{{ trainer.students_participated }}</td>
+                        <td>{{ trainer.students_won }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No performance data available.</p>
+            {% endif %}
+
+        {% elif section == "leaderboard" %}
+            <h2>Trainer Leaderboard</h2>
+            <label for="categoryFilter">Sort by Category:</label>
+            <select id="categoryFilter" onchange="filterCategory()">
+                <option value="all">All Trainers</option>
+                <option value="top">Top Performers (> 80%)</option>
+                <option value="good">Good Performers (60% - 80%)</option>
+                <option value="average">Average Performers (40% - 60%)</option>
+                <option value="below">Below Average (20% - 40%)</option>
+                <option value="under">Underperformers (< 20%)</option>
+            </select>
+
+            {% if leaderboard_data %}
+                <table id="leaderboardTable">
+                    <tr>
+                        <th onclick="sortTable(0)">Rank 🔽</th>
+                        <th>Trainer</th>
+                        <th onclick="sortTable(2)">Self Evaluation Score 🔽</th>
+                        <th onclick="sortTable(3)">Feedback Score 🔽</th>
+                        <th onclick="sortTable(4)">Combined Score 🔽</th>
+                        <th>Category</th>
+                    </tr>
+                    {% for trainer in leaderboard_data %}
+                    <tr class="trainer-row" data-score="{{ trainer.combined_score }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ trainer.trainer.user.username }}</td>
+                        <td>{{ trainer.self_evaluation_score }}</td>
+                        <td>{{ trainer.feedback_score }}</td>
+                        <td>{{ trainer.combined_score }}</td>
+                        <td class="category">
+                            {% if trainer.combined_score > 80 %}
+                                Top Performer
+                            {% elif trainer.combined_score >= 60 %}
+                                Good Performer
+                            {% elif trainer.combined_score >= 40 %}
+                                Average Performer
+                            {% elif trainer.combined_score >= 20 %}
+                                Below Average
+                            {% else %}
+                                Underperformer
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No leaderboard data available.</p>
+            {% endif %}
+
+        {% elif section == "students_feedback" %}
+            <h2>Students Feedback</h2>
+            {% if feedback_list %}
+                <table>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Trainer Name</th>
+                        <th>Interaction</th>
+                        <th>Learning</th>
+                        <th>Rating</th>
+                        <th>Points</th>
+                        <th>Feedback</th>
+                    </tr>
+                    {% for feedback in feedback_list %}
+                    <tr>
+                        <td>{{ feedback.Timestamp|default:"-" }}</td>
+                        <td>{{ feedback.Trainer_Name|default:"-" }}</td>
+                        <td>{{ feedback.Interaction_How_was_the_interaction_throughout_the_session|default:"-" }}</td>
+                        <td>{{ feedback.Learning_Quotient_How_much_of_the_knowledge_shared_in_the_session_did_you_understand|default:"-" }}</td>
+                        <td>{{ feedback.Trainers_Rating_Rate_the_trainer_based_on_their_knowledge_interaction_energy_of_the_session_and_patience|default:"-" }}</td>
+                        <td>{{ feedback.Trainers_Point|default:"-" }}</td>
+                        <td>{{ feedback.Any_other_feedbacks_suggestions|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No feedback data available.</p>
+            {% endif %}
+
+        {% elif section == "trainers_average" %}
+            <h2>Trainers' Average Points</h2>
+            {% if avg_points_list %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Trainer Name</th>
+                                <th>Average Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trainer in avg_points_list %}
+                            <tr>
+                                <td>{{ trainer.Trainer_Name|default:"-" }}</td>
+                                <td>{{ trainer.Average_Points|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No data available.
+                </div>
+            {% endif %}
+            <!-- Back Button -->
+            <div class="text-center mt-4">
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("leaderboardTable");
+            switching = true;
+            dir = "asc";
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir == "asc") {
+                        if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        function filterCategory() {
+            var filter = document.getElementById("categoryFilter").value;
+            var rows = document.querySelectorAll(".trainer-row");
+
+            rows.forEach(row => {
+                var score = parseFloat(row.getAttribute("data-score"));
+                row.style.display = "table-row";
+
+                if (filter === "top" && score <= 80) {
+                    row.style.display = "none";
+                } else if (filter === "good" && (score < 60 || score > 80)) {
+                    row.style.display = "none";
+                } else if (filter === "average" && (score < 40 || score >= 60)) {
+                    row.style.display = "none";
+                } else if (filter === "below" && (score < 20 || score >= 40)) {
+                    row.style.display = "none";
+                } else if (filter === "under" && score >= 20) {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

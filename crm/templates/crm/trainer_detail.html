@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .buttons a {
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            color: white;
+            text-align: center;
+        }
+        .edit {
+            background: #007bff;
+        }
+        .delete {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Trainer Details</h2>
+        <p><strong>Name:</strong> {{ trainer.user.username }}</p>
+        <p><strong>Designation:</strong> {{ trainer.designation }}</p>
+        <p><strong>Email:</strong> {{ trainer.user.email }}</p>
+        <p><strong>Phone:</strong> {{ trainer.phone }}</p>
+        <p><strong>Experience:</strong> {{ trainer.experience }} years</p>
+
+        <div class="buttons">
+            <a href="{% url 'edit_trainer' trainer.id %}" class="edit">Edit</a>
+            <a href="{% url 'delete_trainer' trainer.id %}" class="delete" onclick="return confirm('Are you sure?')">Delete</a>
+        </div>
+    </div>
+
+</body>
+</html>

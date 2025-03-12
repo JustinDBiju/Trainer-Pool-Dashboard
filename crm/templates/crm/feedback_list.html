@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainer Dashboard</title>
+    <style>
+        .trainer-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric {
+            color: #2c3e50;
+            margin: 8px 0;
+        }
+        .overall {
+            font-weight: bold;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trainer Performance Dashboard</h1>
+    {% for trainer in trainers %}
+    <div class="trainer-card">
+        <h2>{{ trainer.name }}</h2>
+        <div class="metric">Interaction: {{ trainer.avg_interaction|floatformat:1 }}</div>
+        <div class="metric">Knowledge: {{ trainer.avg_knowledge|floatformat:1 }}</div>
+        <div class="metric">Communication: {{ trainer.avg_communication|floatformat:1 }}</div>
+        <div class="overall">Overall: {{ trainer.overall|floatformat:1 }}</div>
+    </div>
+    {% endfor %}
+</body>
+</html>
